@@ -238,6 +238,11 @@ main(int argc, char **argv)
 	npf = npf_dpdk_create(0);
 	assert(npf != NULL);
 
+	/* Note: before processing packets,
+	 * each thread doing that must register with NPF instance.
+	 */
+	npf_thread_register(npf);
+
 	/* Attach a virtual interface to NPF. */
 	ifp = npf_dpdk_ifattach(npf, "dpdk0", 1);
 	assert(ifp != NULL);
@@ -246,11 +251,7 @@ main(int argc, char **argv)
 	ncf = create_npf_config();
 	load_npf_config(npf, ncf);
 
-	/*
-	 * Process the packets.  Note: before processing packets,
-	 * each thread doing that must register with NPF instance.
-	 */
-	npf_thread_register(npf);
+	/* Process the packets. */
 	for (unsigned i = 0; i < (16 * 1024); i++) {
 		process_packets(npf, ifp, PFIL_IN, c);
 	}
